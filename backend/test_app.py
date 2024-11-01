@@ -70,19 +70,6 @@ def user(client):
     user.first().save()
 
 
-@pytest.fixture
-def mocker_fixture(mocker):
-    """
-    Fixture to apply common mock setups for tests.
-
-    :param mocker: the mocker fixture provided by pytest-mock
-    """
-    # Example of a common patch you might want to use
-    mocker.patch("app.get_new_user_id", return_value=-1)
-
-    yield mocker  # Yield the mocker for use in tests
-
-
 # 1. testing if the flask app is running properly
 def test_alive(client):
     """

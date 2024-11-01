@@ -51,7 +51,7 @@ def user(client):
     :return: the user object and auth token
     """
     # print(request.data)
-    data = {"username": "testUser", "password": "test", "fullName": "fullName"}
+    data = {"username": "testUser", "password": "test", "fullName": "fullName", "id": 1}
 
     user = Users.objects(username=data["username"])
     if not user:

@@ -14,9 +14,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
         working-directory: frontend/
+
       - name: Build
         run: npm run build
         working-directory: frontend/

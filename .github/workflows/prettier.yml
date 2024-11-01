@@ -7,7 +7,7 @@ on:
     branches: [project2]
 
 jobs:
-  check:
+  format:
     runs-on: ubuntu-latest
 
     steps:

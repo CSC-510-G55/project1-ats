@@ -54,8 +54,13 @@ def user(client):
     data = {"username": "testUser", "password": "test", "fullName": "fullName"}
 
     user = Users.objects(username=data["username"])
-    user.first()["applications"] = []
-    user.first().save()
+    if not user:
+        user = Users(**data)
+        user.save()
+    else:
+        user = user.first()
+        user["applications"] = []
+        user.save()
     rv = client.post("/users/login", json=data)
     jdata = json.loads(rv.data.decode("utf-8"))
     header = {"Authorization": "Bearer " + jdata["token"]}

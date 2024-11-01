@@ -27,7 +27,7 @@ jobs:
           pylint $(git ls-files '*.py') > pylint_output.txt || true
           score=$(tail -n 1 pylint_output.txt | awk '{print $2}')  # Get the Pylint score
           echo "::set-output name=score::$score"  # Set the score as output
-      
-      - name: Save Pylint score to file
-        run: echo "Pylint Score: ${{ steps.pylint.outputs.score }}" > pylint_score.txt
 
+      - name: Save Pylint score to file
+        run: |
+          echo "Pylint Score: ${{ steps.pylint.outputs.score }}" > pylint_score.txt

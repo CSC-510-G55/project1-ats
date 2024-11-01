@@ -40,7 +40,7 @@ jobs:
       - name: Set environment variable for MongoDB
         run: echo "MONGODB_HOST_STRING=mongodb://localhost:27017/mydatabase" >> $GITHUB_ENV
 
-      - name: Test with pytest, upload to codecov
+      - name: Test with pytest
         run: |
           cd ./backend
           pwd

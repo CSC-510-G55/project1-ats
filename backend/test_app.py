@@ -42,31 +42,45 @@ def client():
     db.disconnect()
 
 
+init = False
+
+
 @pytest.fixture
 def user(client):
+    global init
     """
     Creates a user with test data
 
     :param client: the mongodb client
     :return: the user object and auth token
     """
-    # print(request.data)
-    data = {"username": "testUser", "password": "test", "fullName": "fullName", "id": 1}
+    data = {"username": "testUser", "password": "test", "fullName": "fullName"}
 
-    user = Users.objects(username=data["username"])
-    if not user:
-        user = Users(**data)
-        user.save()
-    else:
-        user = user.first()
-        user["applications"] = []
-        user.save()
+    if not init:
+        resp = client.post("/users/signup", json=data)
+        print(json.loads(resp.data.decode("utf-8")))
+        init = True
+
     rv = client.post("/users/login", json=data)
     jdata = json.loads(rv.data.decode("utf-8"))
     header = {"Authorization": "Bearer " + jdata["token"]}
+    user = Users.objects(username=data["username"])
     yield user.first(), header
     user.first()["applications"] = []
     user.first().save()
+
+
+@pytest.fixture
+def mocker_fixture(mocker):
+    """
+    Fixture to apply common mock setups for tests.
+
+    :param mocker: the mocker fixture provided by pytest-mock
+    """
+    # Example of a common patch you might want to use
+    mocker.patch("app.get_new_user_id", return_value=-1)
+
+    yield mocker  # Yield the mocker for use in tests
 
 
 # 1. testing if the flask app is running properly

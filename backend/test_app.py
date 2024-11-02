@@ -860,12 +860,16 @@ def test_search_pagination(client, user):
     _, header = user
 
     # First page
-    rv = client.get("/search?keywords=developer&page=1", headers=header)
+    rv = client.get(
+        "/search?keywords=software+engineer&location=USA&page=1", headers=header
+    )
     assert rv.status_code == 200
     first_page = rv.json
 
     # Second page
-    rv = client.get("/search?keywords=developer&page=2", headers=header)
+    rv = client.get(
+        "/search?keywords=software+engineer&location=USA&page=2", headers=header
+    )
     assert rv.status_code == 200
     second_page = rv.json
 

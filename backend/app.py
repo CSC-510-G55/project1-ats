@@ -159,67 +159,6 @@ def create_app():
     def health_check():
         return jsonify({"message": "Server up and running"}), 200
 
-    @app.route("/users/signupGoogle")
-    def signupGoogle():
-
-        oauth.register(
-            name="google",
-            client_id=GOOGLE_CLIENT_ID,
-            client_secret=GOOGLE_CLIENT_SECRET,
-            server_metadata_url=CONF_URL,
-            client_kwargs={"scope": "openid email profile"},
-            nonce="foobar",
-        )
-
-        # Redirect to google_auth function
-        redirect_uri = url_for("authorized", _external=True)
-        print(redirect_uri)
-
-        session["nonce"] = generate_token()
-        return oauth.google.authorize_redirect(redirect_uri, nonce=session["nonce"])
-
-    @app.route("/users/signupGoogle/authorized")
-    def authorized():
-        token = oauth.google.authorize_access_token()
-        user = oauth.google.parse_id_token(token, nonce=session["nonce"])
-        session["user"] = user
-
-        user_exists = Users.objects(email=user["email"]).first()
-
-        users_email = user["email"]
-        full_name = user["given_name"] + " " + user["family_name"]
-
-        if user["email_verified"]:
-            if user_exists is None:
-                userSave = Users(
-                    id=get_new_user_id(),
-                    fullName=full_name,
-                    email=users_email,
-                    authTokens=[],
-                    applications=[],
-                    skills=[],
-                    job_levels=[],
-                    locations=[],
-                    phone_number="",
-                    address="",
-                )
-                userSave.save()
-                unique_id = userSave["id"]
-            else:
-                unique_id = user_exists["id"]
-
-        userSaved = Users.objects(email=user["email"]).first()
-        expiry = datetime.now() + timedelta(days=1)
-        expiry_str = expiry.strftime("%m/%d/%Y, %H:%M:%S")
-        token_whole = str(unique_id) + "." + token["access_token"]
-        auth_tokens_new = userSaved["authTokens"] + [
-            {"token": token_whole, "expiry": expiry_str}
-        ]
-        userSaved.update(authTokens=auth_tokens_new)
-
-        return redirect(
-            f"{os.environ.get("BASE_FRONTEND_URL")}/?token={token_whole}&expiry={expiry_str}&userId={unique_id}"
-        )
 
     @app.route("/users/signup", methods=["POST"])
     def sign_up():

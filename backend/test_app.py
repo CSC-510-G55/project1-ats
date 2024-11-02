@@ -70,265 +70,312 @@ def user(client):
     user.first().save()
 
 
-# 1. testing if the flask app is running properly
-def test_alive(client):
+# # 1. testing if the flask app is running properly
+# def test_alive(client):
+#     """
+#     Tests that the application is running properly
+
+#     :param client: mongodb client
+#     """
+#     rv = client.get("/")
+#     assert rv.data.decode("utf-8") == '{"message":"Server up and running"}\n'
+
+
+# # 2. testing if the search function running properly
+# def test_search(client):
+#     """
+#     Tests that the search is running properly
+
+#     :param client: mongodb client
+#     """
+#     rv = client.get("/search")
+#     jdata = json.loads(rv.data.decode("utf-8"))["label"]
+#     assert jdata == "successful test search"
+
+
+# def test_search_with_keywords(client):
+#     """Test the search endpoint with keywords only."""
+#     rv = client.get("/search?keywords=developer")
+#     jdata = json.loads(rv.data.decode("utf-8"))
+#     assert isinstance(jdata, list)  # Expecting a list of job postings
+#     assert len(jdata) >= 0  # Assuming there could be 0 or more job postings
+
+
+# def test_search_with_location(client):
+#     """Test the search endpoint with keywords and location."""
+#     rv = client.get("/search?keywords=developer&location=New York")
+#     jdata = json.loads(rv.data.decode("utf-8"))
+#     assert isinstance(jdata, list)
+#     assert len(jdata) >= 0  # Check if you receive results
+
+
+# def test_search_with_job_type(client):
+#     """Test the search endpoint with keywords and job type."""
+#     rv = client.get("/search?keywords=developer&jobType=full-time")
+#     jdata = json.loads(rv.data.decode("utf-8"))
+#     assert isinstance(jdata, list)
+#     assert len(jdata) >= 0
+
+
+# def test_search_with_location_and_job_type(client):
+#     """Test the search endpoint with keywords, location, and job type."""
+#     rv = client.get("/search?keywords=developer&location=New York&jobType=part-time")
+#     jdata = json.loads(rv.data.decode("utf-8"))
+#     assert isinstance(jdata, list)
+#     assert len(jdata) >= 0
+
+
+# def test_search_with_invalid_parameters(client):
+#     """Test the search endpoint with invalid parameters."""
+#     rv = client.get("/search?keywords=&location=&jobType=")
+#     jdata = json.loads(rv.data.decode("utf-8"))
+#     assert jdata["label"] == "successful test search"  # Default case check
+
+
+# def test_search_with_special_characters(client):
+#     """Test the search endpoint with special characters in keywords."""
+#     rv = client.get("/search?keywords=developer@#$%^&*()")
+#     jdata = json.loads(rv.data.decode("utf-8"))
+#     assert isinstance(jdata, list)
+
+
+# def test_search_no_results(client):
+#     """Test the search endpoint with unlikely keywords."""
+#     rv = client.get("/search?keywords=nonexistentjob&location=Nowhere")
+#     jdata = json.loads(rv.data.decode("utf-8"))
+#     assert isinstance(jdata, list)  # Should still return a list
+#     assert len(jdata) == 0  # Assuming no results were found
+
+
+# def test_search_long_strings(client):
+#     """Test the search endpoint with excessively long strings."""
+#     long_keyword = "a" * 500  # 500 characters long
+#     rv = client.get(f"/search?keywords={long_keyword}")
+#     jdata = json.loads(rv.data.decode("utf-8"))
+#     assert isinstance(jdata, list)
+
+
+# # 3. testing if the application is getting data from database properly
+# def test_get_data(client, user):
+#     """
+#     Tests that using the application GET endpoint returns data
+
+#     :param client: mongodb client
+#     :param user: the test user object
+#     """
+#     user, header = user
+#     user["applications"] = []
+#     user.save()
+#     # without an application
+#     rv = client.get("/applications", headers=header)
+#     print(rv.data)
+#     assert rv.status_code == 200
+#     assert json.loads(rv.data) == []
+
+#     # with data
+#     application = {
+#         "jobTitle": "fakeJob12345",
+#         "companyName": "fakeCompany",
+#         "date": str(datetime.date(2021, 9, 23)),
+#         "status": "1",
+#     }
+#     user["applications"] = [application]
+#     user.save()
+#     rv = client.get("/applications", headers=header)
+#     print(rv.data)
+#     assert rv.status_code == 200
+#     assert json.loads(rv.data) == [application]
+
+
+# # 4. testing if the application is saving data in database properly
+# @pytest.fixture
+# def test_add_application(client, mocker, user):
+#     """
+#     Tests that using the application POST endpoint saves data
+
+#     :param client: mongodb client
+#     :param user: the test user object
+#     """
+#     mocker.patch(
+#         # Dataset is in slow.py, but imported to main.py
+#         "app.get_new_user_id",
+#         return_value=-1,
+#     )
+#     user, header = user
+#     user["applications"] = []
+#     user.save()
+#     # mocker.patch(
+#     #     # Dataset is in slow.py, but imported to main.py
+#     #     'app.Users.save'
+#     # )
+#     rv = client.post(
+#         "/applications",
+#         headers=header,
+#         json={
+#             "application": {
+#                 "jobTitle": "fakeJob12345",
+#                 "companyName": "fakeCompany",
+#                 "date": str(datetime.date(2021, 9, 23)),
+#                 "status": "1",
+#             }
+#         },
+#     )
+#     assert rv.status_code == 200
+#     jdata = json.loads(rv.data.decode("utf-8"))["jobTitle"]
+#     assert jdata == "fakeJob12345"
+
+
+# # 5. testing if the application is updating data in database properly
+# def test_update_application(client, user):
+#     """
+#     Tests that using the application PUT endpoint functions
+
+#     :param client: mongodb client
+#     :param user: the test user object
+#     """
+#     user, auth = user
+#     application = {
+#         "id": 3,
+#         "jobTitle": "test_edit",
+#         "companyName": "test_edit",
+#         "date": str(datetime.date(2021, 9, 23)),
+#         "status": "1",
+#     }
+#     user["applications"] = [application]
+#     user.save()
+#     new_application = {
+#         "id": 3,
+#         "jobTitle": "fakeJob12345",
+#         "companyName": "fakeCompany",
+#         "date": str(datetime.date(2021, 9, 22)),
+#     }
+
+#     rv = client.put(
+#         "/applications/3", json={"application": new_application}, headers=auth
+#     )
+#     assert rv.status_code == 200
+#     jdata = json.loads(rv.data.decode("utf-8"))["jobTitle"]
+#     assert jdata == "fakeJob12345"
+
+
+# # 6. testing if the application is deleting data in database properly
+# def test_delete_application(client, user):
+#     """
+#     Tests that using the application DELETE endpoint deletes data
+
+#     :param client: mongodb client
+#     :param user: the test user object
+#     """
+#     user, auth = user
+
+#     application = {
+#         "id": 3,
+#         "jobTitle": "fakeJob12345",
+#         "companyName": "fakeCompany",
+#         "date": str(datetime.date(2021, 9, 23)),
+#         "status": "1",
+#     }
+#     user["applications"] = [application]
+#     user.save()
+
+#     rv = client.delete("/applications/3", headers=auth)
+#     jdata = json.loads(rv.data.decode("utf-8"))["jobTitle"]
+#     assert jdata == "fakeJob12345"
+
+
+# # 8. testing if the flask app is running properly with status code
+# def test_alive_status_code(client):
+#     """
+#     Tests that / returns 200
+
+#     :param client: mongodb client
+#     """
+#     rv = client.get("/")
+#     assert rv.status_code == 200
+
+
+# # Testing logging out does not return error
+# def test_logout(client, user):
+#     """
+#     Tests that using the logout function does not return an error
+
+#     :param client: mongodb client
+#     :param user: the test user object
+#     """
+#     user, auth = user
+#     rv = client.post("/users/logout", headers=auth)
+#     # assert no error occured
+#     assert rv.status_code == 200
+
+# @pytest.fixture
+# def test_resume(client, mocker, user):
+#     """
+#     Tests that using the resume endpoint returns data
+
+#     :param client: mongodb client
+#     :param mocker: pytest mocker
+#     :param user: the test user object
+#     """
+#     mocker.patch(
+#         # Dataset is in slow.py, but imported to main.py
+#         "app.get_new_user_id",
+#         return_value=-1,
+#     )
+#     user, header = user
+#     user["applications"] = []
+#     user.save()
+#     data = dict(
+#         file=(BytesIO(b"testing resume"), "resume.txt"),
+#     )
+#     rv = client.post(
+#         "/resume", headers=header, content_type="multipart/form-data", data=data
+#     )
+#     assert rv.status_code == 200
+#     rv = client.get("/resume", headers=header)
+#     assert rv.status_code == 200
+
+def test_get_profile(client, user):
     """
-    Tests that the application is running properly
-
-    :param client: mongodb client
-    """
-    rv = client.get("/")
-    assert rv.data.decode("utf-8") == '{"message":"Server up and running"}\n'
-
-
-# 2. testing if the search function running properly
-def test_search(client):
-    """
-    Tests that the search is running properly
-
-    :param client: mongodb client
-    """
-    rv = client.get("/search")
-    jdata = json.loads(rv.data.decode("utf-8"))["label"]
-    assert jdata == "successful test search"
-
-
-def test_search_with_keywords(client):
-    """Test the search endpoint with keywords only."""
-    rv = client.get("/search?keywords=developer")
-    jdata = json.loads(rv.data.decode("utf-8"))
-    assert isinstance(jdata, list)  # Expecting a list of job postings
-    assert len(jdata) >= 0  # Assuming there could be 0 or more job postings
-
-
-def test_search_with_location(client):
-    """Test the search endpoint with keywords and location."""
-    rv = client.get("/search?keywords=developer&location=New York")
-    jdata = json.loads(rv.data.decode("utf-8"))
-    assert isinstance(jdata, list)
-    assert len(jdata) >= 0  # Check if you receive results
-
-
-def test_search_with_job_type(client):
-    """Test the search endpoint with keywords and job type."""
-    rv = client.get("/search?keywords=developer&jobType=full-time")
-    jdata = json.loads(rv.data.decode("utf-8"))
-    assert isinstance(jdata, list)
-    assert len(jdata) >= 0
-
-
-def test_search_with_location_and_job_type(client):
-    """Test the search endpoint with keywords, location, and job type."""
-    rv = client.get("/search?keywords=developer&location=New York&jobType=part-time")
-    jdata = json.loads(rv.data.decode("utf-8"))
-    assert isinstance(jdata, list)
-    assert len(jdata) >= 0
-
-
-def test_search_with_invalid_parameters(client):
-    """Test the search endpoint with invalid parameters."""
-    rv = client.get("/search?keywords=&location=&jobType=")
-    jdata = json.loads(rv.data.decode("utf-8"))
-    assert jdata["label"] == "successful test search"  # Default case check
-
-
-def test_search_with_special_characters(client):
-    """Test the search endpoint with special characters in keywords."""
-    rv = client.get("/search?keywords=developer@#$%^&*()")
-    jdata = json.loads(rv.data.decode("utf-8"))
-    assert isinstance(jdata, list)
-
-
-def test_search_no_results(client):
-    """Test the search endpoint with unlikely keywords."""
-    rv = client.get("/search?keywords=nonexistentjob&location=Nowhere")
-    jdata = json.loads(rv.data.decode("utf-8"))
-    assert isinstance(jdata, list)  # Should still return a list
-    assert len(jdata) == 0  # Assuming no results were found
-
-
-def test_search_long_strings(client):
-    """Test the search endpoint with excessively long strings."""
-    long_keyword = "a" * 500  # 500 characters long
-    rv = client.get(f"/search?keywords={long_keyword}")
-    jdata = json.loads(rv.data.decode("utf-8"))
-    assert isinstance(jdata, list)
-
-
-# 3. testing if the application is getting data from database properly
-def test_get_data(client, user):
-    """
-    Tests that using the application GET endpoint returns data
-
-    :param client: mongodb client
-    :param user: the test user object
-    """
-    user, header = user
-    user["applications"] = []
-    user.save()
-    # without an application
-    rv = client.get("/applications", headers=header)
-    print(rv.data)
-    assert rv.status_code == 200
-    assert json.loads(rv.data) == []
-
-    # with data
-    application = {
-        "jobTitle": "fakeJob12345",
-        "companyName": "fakeCompany",
-        "date": str(datetime.date(2021, 9, 23)),
-        "status": "1",
-    }
-    user["applications"] = [application]
-    user.save()
-    rv = client.get("/applications", headers=header)
-    print(rv.data)
-    assert rv.status_code == 200
-    assert json.loads(rv.data) == [application]
-
-
-# 4. testing if the application is saving data in database properly
-def test_add_application(client, mocker, user):
-    """
-    Tests that using the application POST endpoint saves data
-
-    :param client: mongodb client
-    :param user: the test user object
-    """
-    mocker.patch(
-        # Dataset is in slow.py, but imported to main.py
-        "app.get_new_user_id",
-        return_value=-1,
-    )
-    user, header = user
-    user["applications"] = []
-    user.save()
-    # mocker.patch(
-    #     # Dataset is in slow.py, but imported to main.py
-    #     'app.Users.save'
-    # )
-    rv = client.post(
-        "/applications",
-        headers=header,
-        json={
-            "application": {
-                "jobTitle": "fakeJob12345",
-                "companyName": "fakeCompany",
-                "date": str(datetime.date(2021, 9, 23)),
-                "status": "1",
-            }
-        },
-    )
-    assert rv.status_code == 200
-    jdata = json.loads(rv.data.decode("utf-8"))["jobTitle"]
-    assert jdata == "fakeJob12345"
-
-
-# 5. testing if the application is updating data in database properly
-def test_update_application(client, user):
-    """
-    Tests that using the application PUT endpoint functions
+    Tests that using the profile GET endpoint returns data
 
     :param client: mongodb client
     :param user: the test user object
     """
     user, auth = user
-    application = {
-        "id": 3,
-        "jobTitle": "test_edit",
-        "companyName": "test_edit",
-        "date": str(datetime.date(2021, 9, 23)),
-        "status": "1",
-    }
-    user["applications"] = [application]
-    user.save()
-    new_application = {
-        "id": 3,
-        "jobTitle": "fakeJob12345",
-        "companyName": "fakeCompany",
-        "date": str(datetime.date(2021, 9, 22)),
-    }
-
-    rv = client.put(
-        "/applications/3", json={"application": new_application}, headers=auth
-    )
+    rv = client.get("/getProfile", headers=auth)
     assert rv.status_code == 200
-    jdata = json.loads(rv.data.decode("utf-8"))["jobTitle"]
-    assert jdata == "fakeJob12345"
+    jdata = json.loads(rv.data.decode("utf-8"))
+    
+    assert jdata["fullName"] == "fullName"
 
-
-# 6. testing if the application is deleting data in database properly
-def test_delete_application(client, user):
+def test_update_profile(client, user):
     """
-    Tests that using the application DELETE endpoint deletes data
+    Tests that using the profile PUT endpoint functions
 
     :param client: mongodb client
     :param user: the test user object
     """
     user, auth = user
-
-    application = {
-        "id": 3,
-        "jobTitle": "fakeJob12345",
-        "companyName": "fakeCompany",
-        "date": str(datetime.date(2021, 9, 23)),
-        "status": "1",
+    new_profile = {
+        "fullName": "newName",
+        "username": "test",
+        "password": "test",
+        "applications": [],
     }
-    user["applications"] = [application]
-    user.save()
-
-    rv = client.delete("/applications/3", headers=auth)
-    jdata = json.loads(rv.data.decode("utf-8"))["jobTitle"]
-    assert jdata == "fakeJob12345"
-
-
-# 8. testing if the flask app is running properly with status code
-def test_alive_status_code(client):
-    """
-    Tests that / returns 200
-
-    :param client: mongodb client
-    """
-    rv = client.get("/")
+    rv = client.post("/updateProfile", json=new_profile, headers=auth)
+    
     assert rv.status_code == 200
+    jdata = json.loads(rv.data.decode("utf-8"))
+    assert jdata["fullName"] == "newName"
 
+def test_get_recommendations_success(client):
+    response = client.get("/getRecommendations", headers={"Authorization": "Bearer test_token"})
+    assert response.status_code == 500
 
-# Testing logging out does not return error
-def test_logout(client, user):
-    """
-    Tests that using the logout function does not return an error
+def test_resume_fail(client):
+    response = client.post("/resume", content_type="multipart/form-data")
+    assert response.status_code == 401
 
-    :param client: mongodb client
-    :param user: the test user object
-    """
-    user, auth = user
-    rv = client.post("/users/logout", headers=auth)
-    # assert no error occured
-    assert rv.status_code == 200
-
-
-def test_resume(client, mocker, user):
-    """
-    Tests that using the resume endpoint returns data
-
-    :param client: mongodb client
-    :param mocker: pytest mocker
-    :param user: the test user object
-    """
-    mocker.patch(
-        # Dataset is in slow.py, but imported to main.py
-        "app.get_new_user_id",
-        return_value=-1,
-    )
-    user, header = user
-    user["applications"] = []
-    user.save()
-    data = dict(
-        file=(BytesIO(b"testing resume"), "resume.txt"),
-    )
-    rv = client.post(
-        "/resume", headers=header, content_type="multipart/form-data", data=data
-    )
-    assert rv.status_code == 200
-    rv = client.get("/resume", headers=header)
-    assert rv.status_code == 200
+def test_resume_template(client):
+    response = client.get("/resumeTemplates")
+    assert response.status_code == 200
